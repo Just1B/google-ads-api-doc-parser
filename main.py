@@ -67,7 +67,9 @@ def fetch_fields(target_url: str):
 
         fields = soup.find_all(class_="blue responsive")
 
-        parsed = []
+        text_output = "fields,\n"
+        json_output = []
+
         for field in fields:
 
             text = field.find("h2").text
@@ -76,39 +78,20 @@ def fetch_fields(target_url: str):
             if "ENUM" in doc_type:
                 doc_type = "ENUM"
 
-            parsed.append(
-                {
-                    "field": text,
-                    "bq_name": text.replace(".", "_"),
-                    "type": type_to_bq_type(doc_type),
-                }
-            )
-
-        create_outputs(parsed=parsed)
-
-    except requests.exceptions.RequestException as requests_error:
-        logger.exception(requests_error)
-
-    except Exception as error:
-        logger.exception(error)
-
-
-def create_outputs(parsed: list):
-
-    try:
-
-        text_output = "fields,\n"
-        json_output = []
-
-        for p in parsed:
-
-            text_output += f"{p['field']},\n"
+            text_output += f"{text},\n"
             json_output.append(
-                {"name": p["bq_name"], "type": p["type"], "mode": "NULLABLE"}
+                {
+                    "name": text.replace(".", "_"),
+                    "type": type_to_bq_type(doc_type),
+                    "mode": "NULLABLE",
+                }
             )
 
         create_files(filename="fields.csv", content=text_output)
         create_files(filename="schema.json", content=json.dumps(json_output))
+
+    except requests.exceptions.RequestException as requests_error:
+        logger.exception(requests_error)
 
     except Exception as error:
         logger.exception(error)
