@@ -1,3 +1,5 @@
+![Test](https://github.com/Just1B/google-ads-api-doc-parser/workflows/Test/badge.svg)
+
 # Google Ads Api Doc Parser
 
 [![forthebadge](https://forthebadge.com/images/badges/made-with-python.svg)](https://forthebadge.com)
@@ -24,6 +26,10 @@ Parse the Google Ads api documentation and :
     python3 main.py -r ad_group_criterion
 
 ![index](https://github.com/Just1B/google-ads-api-doc-parser/raw/master/images/outputs.png)
+
+## Testing
+
+    python3 -m unittest discover -v
 
 # Licence
 
