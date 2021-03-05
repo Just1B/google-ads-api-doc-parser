@@ -65,7 +65,11 @@ def fetch_fields(target_url: str):
         page = requests.get(target_url)
         soup = BeautifulSoup(page.text, "lxml")
 
-        fields = soup.find_all(class_="blue responsive")
+        # blue responsive -> Resource fields
+        # orange responsive -> Segments
+        # green responsive -> Metrics
+
+        fields = soup.find_all(True, {"class": ["blue responsive", "green responsive"]})
 
         text_output = "fields,\n"
         json_output = []
