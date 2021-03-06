@@ -4,6 +4,6 @@ class Config:
 
     API_VERSION: str = "v6"
 
-    SELECTORS = {"yes": "<!-- Yes, it is -->", "no": "<!--  -->"}
+    SELECTORS = {"yes": " Yes, it is ", "no": " "}
 
     SELECTORS_SET = {" Yes, it is ", " "}

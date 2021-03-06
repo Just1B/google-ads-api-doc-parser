@@ -4,10 +4,16 @@
 
 [![forthebadge](https://forthebadge.com/images/badges/made-with-python.svg)](https://forthebadge.com)
 
-Parse the Google Ads api documentation and :
+Parse the Google Ads api documentation for ressources with or without metrics ( focus on `ressource_fields` and `metrics` only )
 
-- export fields in a text file for the API Query
-- export a big query json schema
+The `SPECIFIED` args ( yes or no ) is your response from the select box, this params is escape for ressources_without_metrics:
+
+<br>
+
+# Outputs
+
+- All Fields in a `csv` file for the API Query
+- All Fields in a `big query json` schema
 
 ## Requirements
 
@@ -17,7 +23,7 @@ Parse the Google Ads api documentation and :
 
 ## Run
 
-    python3 main.py -r REPORT_NAME
+    python3 main.py -r REPORT_NAME -s SPECIFIED
 
 ## Example : ad_group_criterion
 

@@ -53,14 +53,23 @@ def main():
         "-s",
         "--specified",
         help="Is ressource_name specified in the FROM clause of your query ?",
+        choices=["yes", "no"],
         default="no",
     )
 
     args = parser.parse_args()
 
+    logger.info(
+        f"RESSOURCE : {args.ressource_name} - SPECIFIED IN FROM CLAUSE : {args.specified} \n"
+    )
+
     TARGET_URL = f"{Config.MAIN_URL}/{Config.API_VERSION}/{args.ressource_name}"
 
-    get_fields(target_url=TARGET_URL)
+    get_fields(
+        target_url=TARGET_URL,
+        ressource_name=args.ressource_name,
+        specified=args.specified,
+    )
 
 
 def get_parsed_html(target_url: str):
@@ -108,6 +117,7 @@ def parse_page_without_metrics(soup: BeautifulSoup):
 
     fields = soup.find_all(True, {"class": ["blue responsive"]})
 
+    raw = []
     text_output = "fields,\n"
     json_output = []
 
@@ -119,6 +129,7 @@ def parse_page_without_metrics(soup: BeautifulSoup):
         if "ENUM" in doc_type:
             doc_type = "ENUM"
 
+        raw.append(text)
         text_output += f"{text},\n"
         json_output.append(
             {
@@ -131,54 +142,81 @@ def parse_page_without_metrics(soup: BeautifulSoup):
     create_files(filename="fields.csv", content=text_output)
     create_files(filename="schema.json", content=json.dumps(json_output))
 
+    return raw
 
-def parse_page_with_metrics(soup: BeautifulSoup):
+
+def parse_page_with_metrics(soup: BeautifulSoup, ressource_name: str, specified: str):
 
     logger.info(" ** PARSING PAGE WITH METRICS **\n")
 
     # blue responsive -> Resource fields
-    # orange responsive -> Segments
+    # orange responsive -> Segments ( NOT USE HERE BUT SAME LOGIC )
     # green responsive -> Metrics
 
-    # TODO
-
-    # values = soup.find_all(
-    #     True, {"class": ["columns blue responsive", "columns green responsive"]}
-    # )
+    target_ids = []
+    text_output = "fields,\n"
+    json_output = []
 
     # the second columns blue responsive
-    # resource_fields = soup.find_all(True, {"class": ["columns blue responsive"]})[1]
-    # resource_fields = soup.select("table.columns.blue.responsive")[1].find_all("a")
-    # metrics = soup.select("table.columns.green.responsive")
-    # metrics = soup.find_all(True, {"class": ["columns green responsive"]})
+    resource_fields = soup.select("table.columns.blue.responsive")[1].find_all("a")
 
-    # logger.info(resource_fields)
+    for r in resource_fields:
+        target_ids.append(f"{ressource_name}.{r.text}")
 
-    # logger.info(metrics)
+    metrics = soup.select("table.columns.green.responsive")[0].find_all("a")
 
-    # for value in resource_fields:
-    #     #     logger.info(value)
-    #     text = value.find_all("a")
+    for r in metrics:
 
-    #     logger.info(text)
+        comment = r.findAll(text=lambda text: isinstance(text, Comment))
 
-    # logger.info(list_values)
+        if specified == "no":
+            target_ids.append(f"metrics.{r.text}")
 
-    return True
+        elif specified == "yes" and comment[0] == Config.SELECTORS["yes"]:
+            target_ids.append(f"metrics.{r.text}")
+
+    for target_id in target_ids:
+
+        doc_type = (
+            soup.find(id=target_id)
+            .find_parent()
+            .find_parent()
+            .find_parent()
+            .find_all("code")[1]
+            .text
+        )
+
+        text_output += f"{target_id},\n"
+        json_output.append(
+            {
+                "name": target_id.replace(".", "_"),
+                "type": type_to_bq_type(doc_type),
+                "mode": "NULLABLE",
+            }
+        )
+
+    create_files(filename="fields.csv", content=text_output)
+    create_files(filename="schema.json", content=json.dumps(json_output))
+
+    return target_ids
 
 
-def get_fields(target_url: str):
+def get_fields(target_url: str, ressource_name: str, specified: str):
 
     soup = get_parsed_html(target_url=target_url)
 
     # Find page type by parsing comments
     # Ressources with metrics have a selector ( ressources specified in FROM )
-    comments = get_comments(soup)
+    comments = get_comments(soup=soup)
 
-    metrics_page = is_metric_page(comments)
+    metrics_page = is_metric_page(comments=comments)
 
-    parse_page_without_metrics(soup) if not metrics_page else parse_page_with_metrics(
-        soup
+    return (
+        parse_page_without_metrics(soup=soup)
+        if not metrics_page
+        else parse_page_with_metrics(
+            soup=soup, ressource_name=ressource_name, specified=specified
+        )
     )
 
 
