@@ -1,4 +1,4 @@
 .DS_Store
 __pycache__
-out/fields.csv
-out/schema.json
+fields.csv
+schema.json

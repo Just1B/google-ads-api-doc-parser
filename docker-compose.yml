@@ -7,7 +7,7 @@ services:
         user: "${UID}:${GID}"
         command: python main.py --ressource_name video --specified yes
         volumes:
-            - ./out:/out
+            - .:/usr/src/app
 
     # doc-parser-test:
     #     build : .

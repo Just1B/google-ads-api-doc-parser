@@ -137,8 +137,8 @@ def parse_page_without_metrics(soup: BeautifulSoup):
             }
         )
 
-    create_files(filename="/out/fields.csv", content=text_output)
-    create_files(filename="/out/schema.json", content=json.dumps(json_output))
+    create_files(filename="fields.csv", content=text_output)
+    create_files(filename="schema.json", content=json.dumps(json_output))
 
     return raw
 
@@ -193,8 +193,8 @@ def parse_page_with_metrics(soup: BeautifulSoup, ressource_name: str, specified:
             }
         )
 
-    create_files(filename="/out/fields.csv", content=text_output)
-    create_files(filename="/out/schema.json", content=json.dumps(json_output))
+    create_files(filename="fields.csv", content=text_output)
+    create_files(filename="schema.json", content=json.dumps(json_output))
 
     return target_ids
 
