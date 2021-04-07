@@ -92,12 +92,14 @@ def get_parsed_html(target_url: str, ressource_name: str):
 
         selects = soup.find_all(class_=Config.SELECTORS_CLASS)
 
-        is_metrics_page = False
-        if (
-            ressource_name not in Config.WITHOUT_METRICS_EXECPTIONS
-            and len(selects) >= 3
-        ):
-            is_metrics_page = True
+        is_metrics_page = (
+            True
+            if (
+                ressource_name not in Config.WITHOUT_METRICS_EXECPTIONS
+                and len(selects) >= 3
+            )
+            else False
+        )
 
         return (soup, is_metrics_page)
 

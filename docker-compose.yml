@@ -14,4 +14,4 @@ services:
     #     user: "${UID}:${GID}"
     #     command: python -m unittest discover -v
     #     volumes:
-    #         - ./out:/out
+    #         - .:/usr/src/app
