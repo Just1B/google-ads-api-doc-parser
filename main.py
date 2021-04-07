@@ -2,14 +2,15 @@
     Author: Justin Baroux
     Github: https://github.com/Just1B
     Description: Export Google ADS API fields and Big Query Schemas
-    Version: 1.0
+    Version: 1.1
 """
 
 import os
 import json
 import argparse
 
-import requests
+from selenium.webdriver.chrome.options import Options
+from selenium import webdriver
 
 from bs4 import BeautifulSoup, Comment, ResultSet
 from bs4 import Comment
@@ -72,39 +73,36 @@ def main():
     )
 
 
-def get_parsed_html(target_url: str):
+def get_parsed_html(target_url: str, ressource_name: str):
 
     try:
         logger.info(f"TARGET_URL : {target_url}\n")
 
-        page = requests.get(target_url)
-        soup = BeautifulSoup(page.text, "html.parser")
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--no-sandbox")
 
-        return soup
+        driver = webdriver.Chrome(options=chrome_options)
 
-    except requests.exceptions.RequestException as requests_error:
-        logger.exception(requests_error)
+        driver.get(target_url)
+        html = driver.page_source
+        driver.close()
 
-        raise requests_error
+        soup = BeautifulSoup(html, "html.parser")
+
+        selects = soup.find_all(class_=Config.SELECTORS_CLASS)
+
+        is_metrics_page = False
+        if (
+            ressource_name not in Config.WITHOUT_METRICS_EXECPTIONS
+            and len(selects) >= 3
+        ):
+            is_metrics_page = True
+
+        return (soup, is_metrics_page)
 
     except Exception as error:
         logger.exception(error)
-
-        raise error
-
-
-def is_metric_page(comments: ResultSet):
-
-    return Config.SELECTORS_SET.issubset(set(comments))
-
-
-def get_comments(soup: BeautifulSoup):
-
-    try:
-
-        return soup.find_all(string=lambda text: isinstance(text, Comment))
-
-    except Exception as error:
 
         raise error
 
@@ -139,8 +137,8 @@ def parse_page_without_metrics(soup: BeautifulSoup):
             }
         )
 
-    create_files(filename="fields.csv", content=text_output)
-    create_files(filename="schema.json", content=json.dumps(json_output))
+    create_files(filename="/out/fields.csv", content=text_output)
+    create_files(filename="/out/schema.json", content=json.dumps(json_output))
 
     return raw
 
@@ -195,25 +193,21 @@ def parse_page_with_metrics(soup: BeautifulSoup, ressource_name: str, specified:
             }
         )
 
-    create_files(filename="fields.csv", content=text_output)
-    create_files(filename="schema.json", content=json.dumps(json_output))
+    create_files(filename="/out/fields.csv", content=text_output)
+    create_files(filename="/out/schema.json", content=json.dumps(json_output))
 
     return target_ids
 
 
 def get_fields(target_url: str, ressource_name: str, specified: str):
 
-    soup = get_parsed_html(target_url=target_url)
-
-    # Find page type by parsing comments
-    # Ressources with metrics have a selector ( ressources specified in FROM )
-    comments = get_comments(soup=soup)
-
-    metrics_page = is_metric_page(comments=comments)
+    (soup, is_metric_page) = get_parsed_html(
+        target_url=target_url, ressource_name=ressource_name
+    )
 
     return (
         parse_page_without_metrics(soup=soup)
-        if not metrics_page
+        if not is_metric_page
         else parse_page_with_metrics(
             soup=soup, ressource_name=ressource_name, specified=specified
         )

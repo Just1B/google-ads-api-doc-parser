@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  
+    doc-parser:
+        build : .
+        user: "${UID}:${GID}"
+        command: python main.py --ressource_name video --specified yes
+        volumes:
+            - ./out:/out
+
+    # doc-parser-test:
+    #     build : .
+    #     user: "${UID}:${GID}"
+    #     command: python -m unittest discover -v
+    #     volumes:
+    #         - ./out:/out

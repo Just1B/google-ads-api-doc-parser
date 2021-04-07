@@ -1,4 +1,5 @@
 import unittest
+import warnings
 
 from tests import (
     CAMPAIGN_SPECIFIED_YES,
@@ -9,69 +10,44 @@ from tests import (
 
 from config import Config
 
-from main import is_metric_page, get_parsed_html, get_comments, get_fields
+from main import get_parsed_html, get_fields
 
 
 class TestRessourcesWithMetrics(unittest.TestCase):
-    def test_campaign_is_metrics_page(self):
+    def setUp(self):
+        warnings.simplefilter("ignore")
 
-        TARGET_URL = f"{Config.MAIN_URL}/{Config.API_VERSION}/campaign"
+    def test_is_metrics_page(self):
 
-        soup = get_parsed_html(target_url=TARGET_URL)
+        targets = ["video", "campaign", "customer", "keyword_view"]
 
-        comments = get_comments(soup)
+        for target in targets:
 
-        self.assertEqual(is_metric_page(comments), True)
+            with self.subTest(msg=f"Checking {target} is a page with metrics."):
 
-    def test_customer_is_metrics_page(self):
+                TARGET_URL = f"{Config.MAIN_URL}/{Config.API_VERSION}/{target}"
 
-        TARGET_URL = f"{Config.MAIN_URL}/{Config.API_VERSION}/customer"
+                soup, is_metric_page = get_parsed_html(
+                    target_url=TARGET_URL, ressource_name=target
+                )
 
-        soup = get_parsed_html(target_url=TARGET_URL)
+                self.assertEqual(is_metric_page, True)
 
-        comments = get_comments(soup)
+    def test_without_metrics_page(self):
 
-        self.assertEqual(is_metric_page(comments), True)
+        targets = ["ad_group_criterion", "feed", "asset", "keyword_plan"]
 
-    def test_keyword_view_is_metrics_page(self):
+        for target in targets:
 
-        TARGET_URL = f"{Config.MAIN_URL}/{Config.API_VERSION}/keyword_view"
+            with self.subTest(msg=f"Checking {target} is a page without_metrics."):
 
-        soup = get_parsed_html(target_url=TARGET_URL)
+                TARGET_URL = f"{Config.MAIN_URL}/{Config.API_VERSION}/{target}"
 
-        comments = get_comments(soup)
+                soup, is_metric_page = get_parsed_html(
+                    target_url=TARGET_URL, ressource_name=target
+                )
 
-        self.assertEqual(is_metric_page(comments), True)
-
-    def test_ad_group_criterion_without_metrics(self):
-
-        TARGET_URL = f"{Config.MAIN_URL}/{Config.API_VERSION}/ad_group_criterion"
-
-        soup = get_parsed_html(target_url=TARGET_URL)
-
-        comments = get_comments(soup)
-
-        self.assertEqual(is_metric_page(comments), False)
-
-    def test_feed_without_metrics(self):
-
-        TARGET_URL = f"{Config.MAIN_URL}/{Config.API_VERSION}/feed"
-
-        soup = get_parsed_html(target_url=TARGET_URL)
-
-        comments = get_comments(soup)
-
-        self.assertEqual(is_metric_page(comments), False)
-
-    def test_asset_without_metrics(self):
-
-        TARGET_URL = f"{Config.MAIN_URL}/{Config.API_VERSION}/asset"
-
-        soup = get_parsed_html(target_url=TARGET_URL)
-
-        comments = get_comments(soup)
-
-        self.assertEqual(is_metric_page(comments), False)
+                self.assertEqual(is_metric_page, False)
 
     def test_campaign_fields_with_specified(self):
 

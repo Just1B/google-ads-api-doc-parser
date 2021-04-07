@@ -37,6 +37,14 @@ The `SPECIFIED` args ( yes or no ) is your response from the select box, this pa
 
     python3 -m unittest discover -v
 
+## Run in docker
+
+<br>
+
+Get de UID and GID from `id` command and edit the `.env`
+
+    docker-compose up
+
 # Licence
 
 The MIT License

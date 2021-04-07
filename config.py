@@ -6,4 +6,6 @@ class Config:
 
     SELECTORS = {"yes": " Yes, it is ", "no": " "}
 
-    SELECTORS_SET = {" Yes, it is ", " "}
+    WITHOUT_METRICS_EXECPTIONS = ["asset", "shared_set"]
+
+    SELECTORS_CLASS = "devsite-select-toggle"
