@@ -1,4 +1,5 @@
 CAMPAIGN_SPECIFIED_YES = [
+    "campaign.excluded_parent_asset_field_types",
     "campaign.ad_serving_optimization_status",
     "campaign.advertising_channel_sub_type",
     "campaign.advertising_channel_type",
@@ -149,9 +150,11 @@ CAMPAIGN_SPECIFIED_YES = [
     "metrics.video_view_rate",
     "metrics.video_views",
     "metrics.view_through_conversions",
+    "metrics.sk_ad_network_conversions",
 ]
 
 CAMPAIGN_SPECIFIED_NO = [
+    "campaign.excluded_parent_asset_field_types",
     "campaign.ad_serving_optimization_status",
     "campaign.advertising_channel_sub_type",
     "campaign.advertising_channel_type",
@@ -327,6 +330,7 @@ CAMPAIGN_SPECIFIED_NO = [
     "metrics.video_view_rate",
     "metrics.video_views",
     "metrics.view_through_conversions",
+    "metrics.sk_ad_network_conversions",
 ]
 
 KEYWORD_VIEW_SPECIFIED_YES = [
